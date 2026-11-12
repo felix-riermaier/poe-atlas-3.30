@@ -34,6 +34,9 @@
   .halo { fill: none; stroke-width: 18; pointer-events: none; }
   .dim { opacity: 0.18; }
   .hit { stroke: #fff; stroke-width: 14; }
+  .sring { fill: none; stroke: #ffe14d; stroke-width: 3px; vector-effect: non-scaling-stroke; pointer-events: none; animation: pulse 1.2s ease-in-out infinite; }
+  @keyframes pulse { 50% { stroke-opacity: 0.35; } }
+  #searchCount { color: #ffe14d; font-size: 12px; margin: -4px 0 8px; min-height: 14px; }
   .edge.alloc { stroke: #d4b04c; stroke-width: 16; }
   .edge.path { stroke: #7fe3ff; stroke-width: 16; }
   .edge.remove { stroke: #ff5050; stroke-width: 16; }
@@ -56,12 +59,13 @@
     <div id="points"></div>
     <button id="reset" style="width:100%;padding:4px;margin-bottom:8px;background:#3a1e1e;color:#eee;border:1px solid #633;cursor:pointer">Reset tree</button>
     <input id="search" placeholder="Search node text">
+    <div id="searchCount"></div>
     <button id="clear">Clear highlights</button>
     <div id="legend"></div>
     <p style="margin-top:10px">Data: poedb.tw atlas-skill-tree 3.30.</p>
   </div>
   <svg id="tree" xmlns="http://www.w3.org/2000/svg">
-    <g id="edges"></g><g id="halos"></g><g id="nodes"></g><g id="masteries"></g>
+    <g id="edges"></g><g id="halos"></g><g id="nodes"></g><g id="masteries"></g><g id="srings"></g>
   </svg>
   <div id="mods"><h2>Allocated modifiers</h2><div id="modlist"></div></div>
 </div>
@@ -162,6 +166,11 @@ function render() {
     nodeEls[id].classList.toggle("dim", !(inMech && inSearch));
     nodeEls[id].classList.toggle("hit", anySearch && searchHits.has(id));
   }
+  // Search matches: a pulsing ring with a fixed on-screen line width, visible at any zoom.
+  const gS = document.getElementById("srings");
+  gS.innerHTML = "";
+  if (anySearch) for (const id of searchHits) el("circle", { cx: N[id].x, cy: N[id].y, r: size[N[id].k] + 70, class: "sring" }, gS);
+  document.getElementById("searchCount").textContent = anySearch ? `${searchHits.size} matching node${searchHits.size === 1 ? "" : "s"}` : "";
   for (const p of gE.children) {
     const a = N[p.dataset.a], b = N[p.dataset.b];
     p.classList.toggle("dim", anyMech && !(active.has(a.m) || active.has(b.m)));
